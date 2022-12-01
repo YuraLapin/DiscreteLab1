@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Specialized;
 using System.Globalization;
+using System.Transactions;
 
 namespace lab1
 {
@@ -122,7 +123,7 @@ namespace lab1
                         case 2:
                             if (target == u || u.Size() > 0)
                             {
-                                int count = GetFromUser("Введите количество элементов для добавления", true);
+                                int count = GetFromUser("Введите количество элементов, которые будут введены", true);
                                 var rand = new Random();
                                 for (int i = 0; i < count; ++i)
                                 {
@@ -179,39 +180,151 @@ namespace lab1
             Console.WriteLine("   2) Множество");
             Console.WriteLine("   3) Назад");            
             int ans = GetFromUser("Введите действие [1-3]");
-            switch (ans)
+            bool exitFlag = false;
+            while (!exitFlag)
             {
-                case 1:
-                    u.Clear();
-                    break;
-                case 2:
-                    int num;
-                    do
-                    {
-                        num = GetFromUser("Введите номер множества [1-5]", true);
-                        --num;
-                        if (num >= sets.Length)
+                switch (ans)
+                {
+                    case 1:
+                        u.Clear();
+                        exitFlag = true;
+                        break;
+                    case 2:
+                        int num;
+                        exitFlag = true;
+                        do
                         {
-                            Console.WriteLine("Номер долен быть в пределах от 1 до 5");
+                            num = GetFromUser("Введите номер множества [1-5]", true);
+                            --num;
+                            if (num >= sets.Length)
+                            {
+                                Console.WriteLine("Номер долен быть в пределах от 1 до 5");
+                            }
                         }
-                    }
-                    while (num >= sets.Length);
-                    sets[num].Clear();
-                    break;
-                case 3:
-                    return;
-                default:
-                    Console.WriteLine("Введено неверное число");
-                    break;
-            }
+                        while (num >= sets.Length);
+                        sets[num].Clear();
+                        break;
+                    case 3:
+                        return;
+                    default:
+                        Console.WriteLine("Введено неверное число");
+                        break;
+                }
+            }            
         }
+
+        static bool CheckInsertion()
+        {
+            Console.Clear();
+            Console.WriteLine(message);
+            Console.Write("Универсум: ");
+            u.Print();
+            Console.WriteLine();
+            for (int i = 0; i < sets.Length; ++i)
+            {
+                int num = i + 1;
+                Console.Write("Множество " + num + ":");
+                sets[i].Print();
+                Console.WriteLine();
+            }
+            Console.WriteLine("   1) Проверка вхождения элемента");
+            Console.WriteLine("   2) Проверка вхождения множества");
+            Console.WriteLine("   3) Назад");
+            int ans1 = GetFromUser("Введите действие [1-3]");
+            while (1 != 0)
+            {
+                switch (ans1)
+                {
+                    case 1:
+                        Console.WriteLine("   1) Проверка вхождения в Универсум");
+                        Console.WriteLine("   2) Проверка вхождения в множество");
+                        Console.WriteLine("   3) Назад");
+                        int ans2 = GetFromUser("Введите действие [1-3]");
+                        bool exitFlag = false;
+                        while (!exitFlag)
+                        {
+                            switch (ans2)
+                            {
+                                case 1:
+                                    int toCheck = GetFromUser("Введите число для проверки");
+                                    return u.Contains(toCheck);
+                                case 2:
+                                    toCheck = GetFromUser("Введите число для проверки");
+                                    int setIndex;
+                                    do
+                                    {
+                                        setIndex = GetFromUser("Введите номер множества для проверки вхождения элемента");
+                                        --setIndex;
+                                        if (setIndex < 0 || setIndex > sets.GetLength(0) - 1)
+                                        {
+                                            Console.WriteLine("Введен неверный номер");
+                                        }
+                                    } while (setIndex < 0 || setIndex > sets.GetLength(0) - 1);
+                                    return sets[setIndex].Contains(toCheck);
+                                case 3:
+                                    exitFlag = true;
+                                    break;
+                                default:
+                                    Console.WriteLine("Введено неверное число");
+                                    break;
+                            }
+                        }
+                        break;
+                    case 2:
+                        int setIndexInside;
+                        do
+                        {
+                            setIndexInside = GetFromUser("Введите номер множества [1-5], которое должно входить в другое", true);
+                            --setIndexInside;
+                            if (setIndexInside >= sets.GetLength(0))
+                            {
+                                Console.WriteLine("Номер долен быть в пределах от 1 до 5");
+                            }
+                        }
+                        while (setIndexInside >= sets.GetLength(0));
+                        int setIndexOutside;
+                        do
+                        {
+                            setIndexOutside = GetFromUser("Введите номер множества [1-5], в которое должно входить первое", true);
+                            --setIndexOutside;
+                            if (setIndexOutside >= sets.GetLength(0))
+                            {
+                                Console.WriteLine("Номер долен быть в пределах от 1 до 5");
+                            }
+                        }
+                        while (setIndexOutside >= sets.GetLength(0));
+                        return sets[setIndexOutside].Contains(sets[setIndexInside]);
+                    case 3:
+                        return false;
+                    default:
+                        Console.WriteLine("Введено неверное число");
+                        break;
+                }
+                Console.Clear();
+                Console.WriteLine(message);
+                Console.Write("Универсум: ");
+                u.Print();
+                Console.WriteLine();
+                for (int i = 0; i < sets.Length; ++i)
+                {
+                    int num = i + 1;
+                    Console.Write("Множество " + num + ":");
+                    sets[i].Print();
+                    Console.WriteLine();
+                }
+                Console.WriteLine("   1) Проверка вхождения элемента");
+                Console.WriteLine("   2) Проверка вхождения множества");
+                Console.WriteLine("   3) Назад");
+                ans1 = GetFromUser("Введите действие [1-3]");
+            }
+        }        
 
         static void Calculate()
         {
             int num1;
             do
             {
-                num1 = GetFromUser("Введите номер множества 1", true);
+                num1 = GetFromUser("Введите номер левого множества", true);
                 --num1;
                 if (num1 >= sets.Length || num1 < 0)
                 {
@@ -222,7 +335,7 @@ namespace lab1
             int num2;
             do
             {
-                num2 = GetFromUser("Введите номер множества 2", true);
+                num2 = GetFromUser("Введите номер правого множества", true);
                 --num2;
                 if (num2 >= sets.Length || num1 < 0)
                 {
@@ -240,30 +353,31 @@ namespace lab1
             while (!exitFlag)
             {
                 int usrAns = GetFromUser("Введите номер действия [1-5]");
+                var ans = new UserSet();
                 switch (usrAns)
                 {
                     case 1:
-                        sets[num1].IntersectWith(sets[num2]);
+                        ans = sets[num1].IntersectWith(sets[num2]);
                         Console.Write("Результат: ");
-                        message = "Результат действия: " + sets[num1].ToString();
+                        message = "Результат действия: " + ans.ToString();
                         exitFlag = true;
                         break;
                     case 2:
-                        sets[num1].UnionWith(sets[num2]);
+                        ans = sets[num1].UnionWith(sets[num2]);
                         Console.Write("Результат: ");
-                        message = "Результат действия: " + sets[num1].ToString();
+                        message = "Результат действия: " + ans.ToString();
                         exitFlag = true;
                         break;
                     case 3:
-                        sets[num1].ExceptWith(sets[num2]);
+                        ans.Add(sets[num1].ExceptWith(sets[num2]));
                         Console.Write("Результат: ");
-                        message = "Результат действия: " + sets[num1].ToString();
+                        message = "Результат действия: " + ans.ToString();
                         exitFlag = true;
                         break;
                     case 4:
-                        sets[num1].SymmetricExceptWith(sets[num2]);
+                        ans = sets[num1].SymmetricExceptWith(sets[num2]);
                         Console.Write("Результат: ");
-                        message = "Результат действия: " + sets[num1].ToString();
+                        message = "Результат действия: " + ans.ToString();
                         exitFlag = true;
                         break;
                     case 5:
@@ -305,7 +419,8 @@ namespace lab1
                 Console.WriteLine("   1) Добавить элементы");
                 Console.WriteLine("   2) Очистить множество");                
                 Console.WriteLine("   3) Выполнить операцию на множествах");
-                Console.WriteLine("   4) Выход");
+                Console.WriteLine("   4) Проверить вхождение");
+                Console.WriteLine("   5) Выход");
 
                 int answer = GetFromUser("Выберите действие [1-4]");
                 Console.WriteLine();
@@ -322,6 +437,9 @@ namespace lab1
                         Calculate();
                         break;
                     case 4:
+                        message = "Результат действия: " + CheckInsertion();
+                        break;
+                    case 5:
                         exitFlag = true;
                         break;                    
                     default:

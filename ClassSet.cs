@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 namespace lab1
@@ -38,7 +39,10 @@ namespace lab1
 
         public UserSet(in UserSet toCopy)
         {
-            elements = toCopy.elements;
+            foreach (int i in toCopy.elements)
+            {
+                Add(i);
+            }
         }
 
         public void Add(in int elem)
@@ -112,6 +116,23 @@ namespace lab1
             return elements.Contains(elem);
         }
 
+        public bool Contains(in List<int> arr)
+        {
+            foreach(int i in arr)
+            {
+                if (!Contains(i))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public bool Contains(in UserSet set)
+        {
+            return Contains(set.elements);
+        }
+
         public int Rand()
         {
             if (Size() != 0)
@@ -122,9 +143,9 @@ namespace lab1
             return 0;
         }
 
-        public void IntersectWith(in UserSet set)
+        public UserSet IntersectWith(in UserSet set)
         {
-            List<int> ans = new List<int>();
+            var ans = new UserSet();
             foreach (int i in elements)
             {
                 if (set.Contains(i))
@@ -132,38 +153,38 @@ namespace lab1
                     ans.Add(i);
                 }
             }
-            elements = ans;
+            return ans;
         }
 
-        public void UnionWith(in UserSet set)
+        public UserSet UnionWith(in UserSet set)
         {
+            var ans = new UserSet(this);
             foreach (int i in set.elements)
             {
-                Add(i);
+                ans.Add(i);
             }
+            return ans;
         }
 
-        public void ExceptWith(in UserSet set)
+        public UserSet ExceptWith(in UserSet set)
         {
-            List<int> ans = new List<int>();
+            var ans = new UserSet();
             foreach (int i in elements)
             {
                 if (!set.Contains(i))
                 {
-                    ans.Append(i);
+                    ans.Add(i);
                 }
             }
-            elements = ans;
+            return ans;
         }
 
-        public void SymmetricExceptWith(in UserSet set)
+        public UserSet SymmetricExceptWith(in UserSet set)
         {
-            var setCopy = new UserSet(set);
-            var thisCopy = new UserSet(this);
-            thisCopy.ExceptWith(set);
-            setCopy.ExceptWith(this);
-            elements = thisCopy.elements;
-            Add(setCopy);
+            var ans = new UserSet();            
+            ans.Add(this.ExceptWith(set));
+            ans.Add(set.ExceptWith(this));
+            return ans;
         }
     }
 }
