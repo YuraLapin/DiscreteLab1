@@ -391,7 +391,22 @@ namespace lab1
             }
             Console.WriteLine();
             Console.WriteLine();
-        }        
+        }  
+        
+        public static void Complete()
+        {
+            int setIndex;
+            do
+            {
+                setIndex = GetFromUser("Введите номер множества для дополнения", true);
+                --setIndex;
+                if (setIndex >= sets.Length || setIndex < 0)
+                {
+                    Console.WriteLine("Номер долен быть в пределах от 1 до 5");
+                }
+            } while (setIndex >= sets.Length || setIndex < 0);
+            sets[setIndex] = sets[setIndex].UnionWith(u);
+        }
 
         static int Main()
         {
@@ -420,7 +435,8 @@ namespace lab1
                 Console.WriteLine("   2) Очистить множество");                
                 Console.WriteLine("   3) Выполнить операцию на множествах");
                 Console.WriteLine("   4) Проверить вхождение");
-                Console.WriteLine("   5) Выход");
+                Console.WriteLine("   5) Дополнить до универсума");
+                Console.WriteLine("   6) Выход");
 
                 int answer = GetFromUser("Выберите действие [1-4]");
                 Console.WriteLine();
@@ -440,6 +456,9 @@ namespace lab1
                         message = "Результат действия: " + CheckInsertion();
                         break;
                     case 5:
+                        Complete();
+                        break;
+                    case 6:
                         exitFlag = true;
                         break;                    
                     default:
